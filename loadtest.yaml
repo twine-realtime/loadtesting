@@ -8,7 +8,5 @@ config:
 scenarios:
   - name: "HTTP Request and WebSocket Connection"
     flow:
-      - get:
-          url: "/set-cookie"
-      - function: "establishWebSocketConnection"
-      - think: 600
+      - function: "setCookieAndConnectWebSocket"
+      - think: 600 

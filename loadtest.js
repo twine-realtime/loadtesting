@@ -15,7 +15,7 @@ module.exports = {
       }
 
       // Log if successful
-      console.log("Cookie set");
+      // console.log("Cookie set");
 
       const socket = io('https://98y98340923u4.com', {
         transports: ['websocket'],
@@ -23,7 +23,7 @@ module.exports = {
       });
 
       socket.on('connect', () => {
-        console.log("WebSocket connection established");
+        // console.log("WebSocket connection established");
       });
 
       setTimeout(() => {

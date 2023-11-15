@@ -14,28 +14,22 @@ module.exports = {
         throw new Error(`HTTP request failed: ${response.statusText}`);
       }
 
-      // Log cookie setting
+      // Log if successful
       console.log("Cookie set");
 
-      // Establish WebSocket connection
       const socket = io('https://98y98340923u4.com', {
         transports: ['websocket'],
         withCredentials: true,
       });
 
-      // Handle successful connection
       socket.on('connect', () => {
         console.log("WebSocket connection established");
-        // You can also emit events or perform actions here as needed
       });
 
-      // Handle other WebSocket events (e.g., messages, errors)
-
-      // Keep the connection open for a specified duration
       setTimeout(() => {
         socket.disconnect();
         done();
-      }, 600000); // 10 minutes
+      }, 600000); // 10 minutes; aligned with YAML
     } catch (error) {
       console.error(error);
       done();

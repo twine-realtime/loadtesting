@@ -1,0 +1,18 @@
+config:
+  target: https://98y98340923u4.com
+  phases:
+    - duration: 600
+      arrivalRate: 10
+  defaults:
+    headers:
+      Authorization: "{{ $processEnvironment.API_KEY }}"
+      Content-Type: "application/json"
+
+scenarios:
+  - flow:
+      - post:
+          url: "/api/twine"
+          json:
+            room_id: "A"
+            payload:
+              message: "artillery =>"

@@ -3,7 +3,7 @@ config:
   phases:
     - duration: 1200
       arrivalRate: 40
-  processor: "./loadtest.js"
+  processor: "./clients.js"
 
 scenarios:
   - name: "HTTP Request and WebSocket Connection"

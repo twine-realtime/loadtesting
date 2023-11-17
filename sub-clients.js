@@ -35,7 +35,7 @@ module.exports = {
       // console.log("Cookie set");
 
       const socket = io('https://98y98340923u4.com', {
-        transports: ['websocket', 'polling'],
+        transports: ['websocket'],
         withCredentials: true,
       });
 

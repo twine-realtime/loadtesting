@@ -47,7 +47,7 @@ module.exports = {
       setTimeout(() => {
         socket.disconnect();
         done();
-      }, 600000); // 10 minutes
+      }, 1200000); // 20 minutes
     } catch (error) {
       console.error(error);
       done();

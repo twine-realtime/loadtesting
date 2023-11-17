@@ -1,7 +1,7 @@
 # Artillery Loadtesting
 
-## WebSocket Connections
-Twine used [Artillery](https://www.artillery.io/docs) for load testing because of its built-in SocketIO engine, which enabled straightforward connection to the Twine server. However, in Artillery, "each virtual user will pick and run one of the scenarios in the test definition and run it to completion." [1](https://testerops.com/understanding-artillery-tests) That made the Twine flow difficult to mimic in Artillery because the flow requires a successful `/set-cookie` request followed by a second request that establishes the WebSocket connection. That could not occur in sequence for a single virtual user.
+## Phase I: WebSocket Connections
+Twine used [Artillery](https://www.artillery.io/docs) for load testing because of its built-in SocketIO engine, which enabled straightforward connection to the Twine server. However, in Artillery, "each virtual user will pick and run one of the scenarios in the test definition and run it to completion."[1](https://testerops.com/understanding-artillery-tests) That made the Twine flow difficult to mimic in Artillery because the flow requires a successful `/set-cookie` request followed by a second request that establishes the WebSocket connection. That could not occur in sequence for a single virtual user.
 
 This issue was addressed by adding custom processing for the Artillery load test: extracting the Artillery "scenario" logic from the limited YAML options to a more complex JavaScript file. With that in place, each of Artillery's virtual users fetched a cookie, established a WebSocket connection with the Twine server, and maintained that connections, all in sequence.
 
@@ -11,7 +11,7 @@ Next, two dedicated Artillery servers were created to substantially increase the
 
 In the next load test, the Artillery servers created 96,000 virtual users over 20 minutes. Each user successfully requested `/set-cookie`, established a WebSocket connection, and maintained the connection for 20 minutes. The Twine environment began with a single t2.small EC2 server and auto-scaled to four, successfully handling 100% of the 96,000 virtual users and 192,000 requests (one request to `/set-cookie` followed by one request to establish the WebSocket connection, per virtual user).
 
-## Pub/Sub
+## Phase II: Pub/Sub
 Artillery server 1 issued 12,000 requests over 10 minutes, 6,000 per virtual user, and in the process also subscribed each user to a single channel. Artillery server 2 issued 6,000 requests to Twine's API over the same time period, publishing 10 messages per second to the same channel. The initial Twine `t2.small` server reached its limit just before the two-minute auto-scaling breach duration was met, and while two more servers spun up, 2% of the publish requests failed.
 
 The auto-scaling threshold was a very conservative 40% CPU usage with a 2-minute breach duration. Rather than lower it further, we decided to upgrade 
@@ -20,4 +20,4 @@ The auto-scaling threshold was a very conservative 40% CPU usage with a 2-minute
 * 3 successful testing stages: third one triggered auto-scaling
 * postman run with test 
 
-## State Recovery
+## Phase III: State Recovery

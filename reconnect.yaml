@@ -1,0 +1,11 @@
+config:
+  target: https://98y98340923u4.com
+  phases:
+    - duration: 2400
+      arrivalRate: 17
+  processor: "./reconnect.js"
+
+scenarios:
+  - name: "WebSocket Reconnection"
+    flow:
+      - function: "connectAndReconnect"

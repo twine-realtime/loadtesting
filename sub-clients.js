@@ -1,6 +1,6 @@
 const io = require('socket.io-client');
 const fetch = require('node-fetch');
-const duration = 600000 // 10m
+const duration = 300000 // 5m
 
 async function fetchWithRetry(url, options = {}, retries = 3, backoff = 300) {
   let lastError;
@@ -27,24 +27,16 @@ module.exports = {
   setCookieAndConnectWebSocket: async function(context, events, done) {
     const messageTimeout = setTimeout(() => {
       const errorMsg = "The message event was never triggered";
-      events.emit('metric', {
-        name: 'messageEventNeverTriggeredErrors',
-        value: 1
-      });
       done(new Error(errorMsg));
-    }, 400000);
+    }, 100000);
 
     try {
       await fetchWithRetry('https://98y98340923u4.com/set-cookie', {
         method: 'GET',
       });
-    } catch (error) {
-      events.emit('metric', {
-        name: 'fetchWithRetryErrors',
-        value: 1,
-        error: error.message
-      });
-      done(error)
+    } catch {
+      const errorFetch = "Fetch cookie error";
+      done(new Error(errorFetch));
     }
 
     try {
@@ -58,7 +50,7 @@ module.exports = {
         socket.emit('subscribe', 'A');
       });
 
-      socket.on("message", payload => {
+      socket.on("message", _ => {
         clearTimeout(messageTimeout);
       });
 
@@ -66,13 +58,9 @@ module.exports = {
         socket.disconnect();
         done();
       }, duration);
-    } catch (error) {
-      events.emit('metric', {
-        name: 'socketConnectionError',
-        value: 1,
-        error: error.message
-      });
-      done(error);
+    } catch {
+      const errorWS = "WebSocket connection error";
+      done(new Error(errorWS));
     }
   }
 };

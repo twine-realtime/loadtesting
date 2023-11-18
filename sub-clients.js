@@ -38,11 +38,13 @@ module.exports = {
       await fetchWithRetry('https://98y98340923u4.com/set-cookie', {
         method: 'GET',
       });
-    } catch {
+    } catch (error) {
       events.emit('metric', {
         name: 'fetchWithRetryErrors',
-        value: 1
+        value: 1,
+        error: error.message
       });
+      done(error)
     }
 
     try {
@@ -67,9 +69,10 @@ module.exports = {
     } catch (error) {
       events.emit('metric', {
         name: 'socketConnectionError',
-        value: 1
+        value: 1,
+        error: error.message
       });
-      done();
+      done(error);
     }
   }
 };

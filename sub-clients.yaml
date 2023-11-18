@@ -1,8 +1,8 @@
 config:
   target: https://98y98340923u4.com
   phases:
-    - duration: 2400
-      arrivalRate: 17
+    - duration: 600
+      arrivalRate: 10
   processor: "./sub-clients.js"
 
 scenarios:

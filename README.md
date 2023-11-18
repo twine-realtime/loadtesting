@@ -1,6 +1,6 @@
 # Artillery Loadtesting
 
-## Phase I: WebSocket Connections
+## Phase I: Concurrent Connections
 Twine used [Artillery](https://www.artillery.io/docs) for load testing because of its built-in SocketIO engine, which enabled straightforward connection to the Twine server. However, in Artillery, "each virtual user will pick and run one of the scenarios in the test definition and run it to completion."[1](https://testerops.com/understanding-artillery-tests) That made the Twine flow difficult to simulate in Artillery because the flow requires a successful `/set-cookie` request followed by a second request that establishes the WebSocket connection. That could not occur in sequence for a single virtual user.
 
 This issue was addressed by adding custom processing for the Artillery load test: extracting the Artillery "scenario" logic from the limited YAML options to a more complex JavaScript file. With that in place, each of Artillery's virtual users fetched a cookie, established a WebSocket connection with the Twine server, and maintained that connections, all in sequence.
@@ -18,6 +18,7 @@ In the first load test, Artillery server 1 issued 12,000 requests over 10 minute
 
 The auto-scaling threshold was a very conservative 40% CPU usage with a 2-minute breach duration. While the threshold could have been changed to a "Network In" metric, we felt it would trigger auto-scaling too quickly: the `t2.small` server has a "low to moderate" network performance bottleneck. Instead, we upgraded the server to `t3.medium`, which has "up to 5 Gbps" network performance. That resolved the issue without auto-scaling: the load test passed without error.
 
-To trigger auto-scaling, the load test was increased to 40,800 subscribed users over 20 minutes, with 1 `/publish` request per second being stored and emitted to each user. Postman made the `/publish` requests successfully but the Artillery servers crashed under the load and were upgraded to `t3.medium`. The new setup facilitated the load test successfully, and the Twine environment auto-scaled to two servers, successfully handling the load of 81,600 requests, 40,800 concurrent subscribed users, and 1,200 payload emissions over 20 minutes.
+To trigger auto-scaling, the load test was increased to 40,800 subscribed users over 20 minutes (20,400 per Artillery server), with 1 `/publish` request per second being stored and emitted to each user. Postman made the `/publish` requests successfully but the Artillery servers crashed under the load and were upgraded to `t3.medium`. The new setup facilitated the load test successfully, and the Twine environment auto-scaled to two servers, successfully handling the load of 81,600 requests, 40,800 concurrent subscribed users, and 1,200 payload emissions over 20 minutes.
 
 ## Phase III: State Recovery
+The final phase load tested ramping up to 10,800 subscribed clients over 12 minutes, 1 `/publish` request per second being stored and emitted to each user, with the addition of each user disconnecting then reconnecting after 1 minute, then maintaining the reconnection for 10 minutes. The load test passed without fail, emitting 60 missed messages to each user upon reconnection.

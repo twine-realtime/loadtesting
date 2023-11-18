@@ -24,7 +24,7 @@ async function fetchWithRetry(url, options = {}, retries = 3, backoff = 300) {
 }
 
 module.exports = {
-  setCookieAndConnectWebSocket: async function(context, events, done) {
+  connectAndReconnect: async function(context, events, done) {
     const messageTimeout = setTimeout(() => {
       const errorMsg = "The message event was never triggered";
       done(new Error(errorMsg));
@@ -45,34 +45,41 @@ module.exports = {
         withCredentials: true,
       });
 
-      // Immediately subscribe on connection
+      let messageTimeout;
+
       socket.on('connect', () => {
         socket.emit('subscribe', 'A');
       });
 
-      socket.on("message", _ => {
-        clearTimeout(messageTimeout);
-      });
-
       setTimeout(() => {
         socket.disconnect();
+
         setTimeout(() => {
           const socket2 = io('https://98y98340923u4.com', {
             transports: ['websocket'],
             withCredentials: true,
           });
+
           socket2.on('connect', () => {
             socket2.emit('subscribe', 'A');
+
+            // Start messageTimeout timer when socket2 connects
+            messageTimeout = setTimeout(() => {
+              const errorMsg = "Message event never triggered";
+              done(new Error(errorMsg));
+            }, 60000); // 1m
           });
+
           socket2.on("message", _ => {
             clearTimeout(messageTimeout);
           });
+
           setTimeout(() => {
             socket2.disconnect();
             done();
           }, duration);
-        }, 60000); // 1 minute
-      }, 60000); // 1 minute
+        }, 60000); // 1m
+      }, 60000); // 1m
     } catch {
       const errorWS = "WebSocket connection error";
       done(new Error(errorWS));

@@ -24,16 +24,27 @@ async function fetchWithRetry(url, options = {}, retries = 3, backoff = 300) {
 
 module.exports = {
   connectAndReconnect: async function(context, events, done) {
-    try {
-      // Make an HTTP request to set the cookie
-      const response = await fetchWithRetry('https://98y98340923u4.com/set-cookie', {
-        method: 'GET',
-        // Include other options if needed
+    const messageTimeout = setTimeout(() => {
+      const errorMsg = "The message event was never triggered";
+      events.emit('metric', {
+        name: 'messageEventNeverTriggeredErrors',
+        value: 1
       });
+      done(new Error(errorMsg));
+    }, 400000);
 
-      // Log if successful
-      // console.log("Cookie set");
+    try {
+      await fetchWithRetry('https://98y98340923u4.com/set-cookie', {
+        method: 'GET',
+      });
+    } catch {
+      events.emit('metric', {
+        name: 'fetchWithRetryErrors',
+        value: 1
+      });
+    }
 
+    try {
       const socket = io('https://98y98340923u4.com', {
         transports: ['websocket'],
         withCredentials: true,
@@ -44,7 +55,7 @@ module.exports = {
         socket.emit('subscribe', 'A');
       });
 
-      // Connect for 1m > disconnect for 1m > reconnect > maintain connection for 10m
+      // Connect for 1m > disconnect for 1m > reconnect > maintain connection for 10m > check missed messages
       setTimeout(() => {
         socket.disconnect();
         setTimeout(() => {
@@ -55,13 +66,20 @@ module.exports = {
           socket2.on('connect', () => {
             socket2.emit('subscribe', 'A');
           });
+          socket2.on("message", payload => {
+            clearTimeout(messageTimeout);
+          });
           setTimeout(() => {
+            socket2.disconnect();
             done();
           }, 600000); // 10 minutes
         }, 60000); // 1 minute
       }, 60000); // 1 minute
     } catch (error) {
-      console.error(error);
+      events.emit('metric', {
+        name: 'socketConnectionError',
+        value: 1
+      });
       done();
     }
   }

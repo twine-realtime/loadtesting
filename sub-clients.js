@@ -23,17 +23,28 @@ async function fetchWithRetry(url, options = {}, retries = 3, backoff = 300) {
 }
 
 module.exports = {
-  setCookieAndConnectWebSocket: async function(context, events, done) {
-    try {
-      // Make an HTTP request to set the cookie
-      const response = await fetchWithRetry('https://98y98340923u4.com/set-cookie', {
-        method: 'GET',
-        // Include other options if needed
+  connectAndReconnect: async function(context, events, done) {
+    const messageTimeout = setTimeout(() => {
+      const errorMsg = "The message event was never triggered";
+      events.emit('metric', {
+        name: 'messageEventNeverTriggeredErrors',
+        value: 1
       });
+      done(new Error(errorMsg));
+    }, 400000);
 
-      // Log if successful
-      // console.log("Cookie set");
+    try {
+      await fetchWithRetry('https://98y98340923u4.com/set-cookie', {
+        method: 'GET',
+      });
+    } catch {
+      events.emit('metric', {
+        name: 'fetchWithRetryErrors',
+        value: 1
+      });
+    }
 
+    try {
       const socket = io('https://98y98340923u4.com', {
         transports: ['websocket'],
         withCredentials: true,
@@ -44,12 +55,19 @@ module.exports = {
         socket.emit('subscribe', 'A');
       });
 
+      socket.on("message", payload => {
+        clearTimeout(messageTimeout);
+      });
+
       setTimeout(() => {
         socket.disconnect();
         done();
       }, 1200000); // 20 minutes
     } catch (error) {
-      console.error(error);
+      events.emit('metric', {
+        name: 'socketConnectionError',
+        value: 1
+      });
       done();
     }
   }

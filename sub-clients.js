@@ -1,5 +1,6 @@
 const io = require('socket.io-client');
 const fetch = require('node-fetch');
+const duration = 600000 // 10m
 
 async function fetchWithRetry(url, options = {}, retries = 3, backoff = 300) {
   let lastError;
@@ -23,7 +24,7 @@ async function fetchWithRetry(url, options = {}, retries = 3, backoff = 300) {
 }
 
 module.exports = {
-  connectAndReconnect: async function(context, events, done) {
+  setCookieAndConnectWebSocket: async function(context, events, done) {
     const messageTimeout = setTimeout(() => {
       const errorMsg = "The message event was never triggered";
       events.emit('metric', {
@@ -62,7 +63,7 @@ module.exports = {
       setTimeout(() => {
         socket.disconnect();
         done();
-      }, 1200000); // 20 minutes
+      }, duration);
     } catch (error) {
       events.emit('metric', {
         name: 'socketConnectionError',

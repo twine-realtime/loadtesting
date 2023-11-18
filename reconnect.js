@@ -1,5 +1,6 @@
 const io = require('socket.io-client');
 const fetch = require('node-fetch');
+const duration = 600000 // 10m
 
 async function fetchWithRetry(url, options = {}, retries = 3, backoff = 300) {
   let lastError;
@@ -72,7 +73,7 @@ module.exports = {
           setTimeout(() => {
             socket2.disconnect();
             done();
-          }, 600000); // 10 minutes
+          }, duration);
         }, 60000); // 1 minute
       }, 60000); // 1 minute
     } catch (error) {

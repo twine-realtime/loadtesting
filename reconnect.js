@@ -26,7 +26,7 @@ async function fetchWithRetry(url, options = {}, retries = 3, backoff = 300) {
 module.exports = {
   connectAndReconnect: async function(context, events, done) {
     const messageTimeout = setTimeout(() => {
-      const errorMsg = "The message event was never triggered";
+      const errorMsg = 'The message event was never triggered';
       done(new Error(errorMsg));
     }, 100000);
 
@@ -35,7 +35,7 @@ module.exports = {
         method: 'GET',
       });
     } catch {
-      const errorFetch = "Fetch cookie error";
+      const errorFetch = 'Fetch cookie error';
       done(new Error(errorFetch));
     }
 
@@ -49,6 +49,10 @@ module.exports = {
 
       socket.on('connect', () => {
         socket.emit('subscribe', 'A');
+      });
+
+      socket.on('message', payload => {
+        socket.emit('updateSessionTS', payload.timestamp);
       });
 
       setTimeout(() => {
@@ -65,12 +69,12 @@ module.exports = {
 
             // Start messageTimeout timer when socket2 connects
             messageTimeout = setTimeout(() => {
-              const errorMsg = "Message event never triggered";
+              const errorMsg = 'Message event never triggered';
               done(new Error(errorMsg));
             }, 60000); // 1m
           });
 
-          socket2.on("message", _ => {
+          socket2.on('message', _ => {
             clearTimeout(messageTimeout);
           });
 
@@ -81,7 +85,7 @@ module.exports = {
         }, 60000); // 1m
       }, 60000); // 1m
     } catch {
-      const errorWS = "WebSocket connection error";
+      const errorWS = 'WebSocket connection error';
       done(new Error(errorWS));
     }
   }

@@ -30,7 +30,7 @@ module.exports = {
         method: 'GET',
       });
     } catch {
-      const errorFetch = "Fetch cookie error";
+      const errorFetch = 'Fetch cookie error';
       done(new Error(errorFetch));
     }
 
@@ -47,12 +47,12 @@ module.exports = {
 
         // Start messageTimeout timer when socket connects
         messageTimeout = setTimeout(() => {
-          const errorMsg = "Message event never triggered";
+          const errorMsg = 'Message event never triggered';
           done(new Error(errorMsg));
         }, 60000);
       });
 
-      socket.on("message", _ => {
+      socket.on('message', _ => {
         clearTimeout(messageTimeout);
       });
 
@@ -61,7 +61,7 @@ module.exports = {
         done();
       }, duration);
     } catch {
-      const errorWS = "WebSocket connection error";
+      const errorWS = 'WebSocket connection error';
       done(new Error(errorWS));
     }
   }

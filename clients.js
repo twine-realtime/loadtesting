@@ -11,7 +11,7 @@ async function fetchWithRetry(url, options = {}, retries = 3, backoff = 300) {
       if (response.ok) {
         return response;
       }
-      lastError = new Error(`HTTP request failed: ${response.statusText}`);
+      lastError = new Error(`Cookie request failed: ${response.statusText}`);
     } catch (error) {
       lastError = error;
     }
@@ -20,33 +20,23 @@ async function fetchWithRetry(url, options = {}, retries = 3, backoff = 300) {
     backoff *= 2; // Exponential backoff
   }
 
-  throw lastError; // Throw the last error encountered
+  throw lastError;
 }
 
 module.exports = {
   setCookieAndConnectWebSocket: async function(context, events, done) {
-    const messageTimeout = setTimeout(() => {
-      const errorMsg = "The message event was never triggered";
-      done(new Error(errorMsg));
-    }, 100000);
-
     try {
       await fetchWithRetry('https://98y98340923u4.com/set-cookie', {
         method: 'GET',
       });
-    } catch {
-      const errorFetch = "Fetch cookie error";
-      done(new Error(errorFetch));
+    } catch (error) {
+      done(error);
     }
 
     try {
       const socket = io('https://98y98340923u4.com', {
         transports: ['websocket'],
         withCredentials: true,
-      });
-
-      socket.on("message", _ => {
-        clearTimeout(messageTimeout);
       });
 
       setTimeout(() => {

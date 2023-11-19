@@ -11,7 +11,7 @@ async function fetchWithRetry(url, options = {}, retries = 3, backoff = 300) {
       if (response.ok) {
         return response;
       }
-      lastError = new Error(`HTTP request failed: ${response.statusText}`);
+      lastError = new Error(`Cookie request failed: ${response.statusText}`);
     } catch (error) {
       lastError = error;
     }
@@ -34,9 +34,8 @@ module.exports = {
       await fetchWithRetry('https://98y98340923u4.com/set-cookie', {
         method: 'GET',
       });
-    } catch {
-      const errorFetch = 'Fetch cookie error';
-      done(new Error(errorFetch));
+    } catch (error) {
+      done(error);
     }
 
     try {
